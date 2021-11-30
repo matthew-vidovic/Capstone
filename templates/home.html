@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h2>Home Page</h2>
+<p>Welcome back, {{ username }}!</p>
+<h2>LED ==> {{ led }}</h2>
+	
+<h2>LED CTRl ==>
+	<a href='/pythonlogin/home/led/on' class='button'>Turn on</a>
+	<a href='/pythonlogin/home/led/off' class='button'>Turn off</a>
+</h2>
+{% endblock %}

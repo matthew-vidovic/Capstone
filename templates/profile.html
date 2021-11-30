@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block script %} 
+    window.addEventListener('DOMContentLoaded',(event)=>{
+        $("#customers").DataTable({
+            'pageLength':50
+            })
+});
+{% endblock %}
+{% block content %}
+<h2>Profile Page</h2>
+<div>
+    <p>Your account details are below:</p>
+    <table>
+        <tr>
+            <td>Username:</td>
+            <td>{{ account['username'] }}</td>
+        </tr>
+        <tr>
+            <td>Password:</td>
+            <td>{{ account['password'] }}</td>
+        </tr>
+        <tr>
+            <td>Email:</td>
+            <td>{{ account['email'] }}</td>
+        </tr>
+    </table>
+</div>
+<div>
+    <h4>Light Usage:</h4>
+    <table id='customers'>
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Value set to</th>
+                <th>Date Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in lightUsage %}
+                <tr>
+                    <td>
+                        {{row.user_id}}
+                    </td>
+                    <td>
+                        {{row.currentValue}}
+                    </td>
+                    <td>
+                        {{row.timeStamp}}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+        
+</div>
+{% endblock %}
+
+

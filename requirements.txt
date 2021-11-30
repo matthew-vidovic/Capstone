@@ -62,7 +62,7 @@ olefile==0.46
 pantilthat==0.0.7
 parso==0.3.1
 pexpect==4.6.0
-pgzero
+pgzero==1.2
 phatbeat==0.1.1
 pianohat==0.1.0
 picamera==1.13
@@ -78,7 +78,7 @@ pycodestyle==2.4.0
 pycrypto==2.6.1
 pycups==1.9.73
 pyflakes==2.0.0
-pygame
+pygame==1.9.4
 Pygments==2.3.1
 PyGObject==3.30.4
 pyinotify==0.9.6

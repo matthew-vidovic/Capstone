@@ -106,8 +106,8 @@ scrollphathd==1.2.1
 SecretStorage==2.3.1
 semver==2.0.1
 Send2Trash==1.5.0
-python-sense-emu==1.2
-sense-hat==2.2.0
+sense-emu
+sense-hat
 simplegeneric==0.8.1
 simplejson==3.16.0
 six==1.12.0

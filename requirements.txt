@@ -62,7 +62,7 @@ olefile==0.46
 pantilthat==0.0.7
 parso==0.3.1
 pexpect==4.6.0
-pgzero==1.2
+pgzero
 phatbeat==0.1.1
 pianohat==0.1.0
 picamera==1.13

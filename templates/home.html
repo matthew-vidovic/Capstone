@@ -2,13 +2,106 @@
 
 {% block title %}Home{% endblock %}
 
+{% block script %} 
+    window.addEventListener('DOMContentLoaded',(event)=>{
+        let ledsts = '{{ led }}'
+		if (ledsts == 1){
+			$(".switch input")[0].checked = true;
+		}
+		else{
+			$(".switch input")[0].checked = false;
+		}
+
+		
+});
+
+
+
+{% endblock %}
+
 {% block content %}
+
+<script>
+	function action(name,state){
+		if(name == 'led'){
+			console.log(state)
+			$.ajax({
+				type:'POST',
+				url: '/home/led',
+				data:String(state),
+				success:function(response){
+					console.log(response);
+				},
+				error: function(response){
+					console.log(response);
+				}
+			});
+		}
+	}
+</script>
+
+
 <h2>Home Page</h2>
 <p>Welcome back, {{ username }}!</p>
-<h2>LED ==> {{ led }}</h2>
-	
-<h2>LED CTRl ==>
-	<a href='/pythonlogin/home/led/on' class='button'>Turn on</a>
-	<a href='/pythonlogin/home/led/off' class='button'>Turn off</a>
-</h2>
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+	<li class="nav-item" role="presentation">
+	  <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Control</button>
+	</li>
+	<li class="nav-item" role="presentation">
+	  <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Monitor</button>
+	</li>
+</ul>
+  <div class="tab-content" id="myTabContent">
+	<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+		<div>
+			<h3>Lighting</h3>
+			<table id='customers'>
+				<tbody>
+					<tr>
+						<td>Kitchen</td>
+						<td>
+							<label class="switch">
+								<input id='led' type="checkbox" name='led' onchange="action(this.name, $('#led')[0].checked)">
+								<!-- <input id='led' type="checkbox" onchange="window.location.href='/home/led/'+$('#led')[0].checked"> -->
+								<span class="slider round"></span>
+							</label>
+						</td>
+				</tbody>
+			</table>
+		
+			<div style='padding-top:20px'>
+				<h5>Living Room </h5>
+				<table id='customers1'>
+					<tr>
+						<td><a style='color:red' href='/pythonlogin/home/rgb/red' class='button'>Red</a></td>
+						<td><a style='color:green' href='/pythonlogin/home/rgb/green' class='button'>Green</a></td>
+						<td><a style='color:blue' href='/pythonlogin/home/rgb/blue' class='button'>Blue</a></td>
+						<td><a style='color:yellow' href='/pythonlogin/home/rgb/yellow' class='button'>Yellow</a></td>
+						<td><a style='color:purple' href='/pythonlogin/home/rgb/purple' class='button'>Purple</a></td>
+						<td><a style='color:cyan' href='/pythonlogin/home/rgb/cyan' class='button'>Cyan</a></td>
+						<td><a style='color:black' href='/pythonlogin/home/rgb/white' class='button'>White</a></td>
+						<td><a style='color:black' href="/pythonlogin/home/rgb/off" class='button'>Turn off</a></td>
+					</tr>
+				</table>
+			
+			</div>
+			<h3>Fan</h3>
+			<h3>Blinds</h3>
+			<h3>Door</h3>
+			
+		</div>
+	</div>
+
+	<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+		<h3>Gas Sensor</h3>
+		<h3>Motion Detector</h3>
+		<h3>Buzzer</h3>
+	</div>
+
+  </div>
+
+
+
+
 {% endblock %}

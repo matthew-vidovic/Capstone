@@ -234,6 +234,7 @@ def blindControl():
             state = request.get_data()    
             print(state.decode())
             ser.write(str.encode('blinds/'+state.decode()))
+            cursor.execute('INSERT INTO doorUsage VALUES (NULL, %s, %s, NULL)', (session['id'], state.decode()))
 
         return render_template('home.html',**templateData)
     return redirect(url_for('login'))

@@ -86,7 +86,7 @@
 	function checkSensor(){
 		$.ajax({
 			type:"POST",
-			url:'/home/ir',
+			url:'/home/sensor',
 			success:function(res){
 				console.log(res)
 				if(res.ir == 'on'){

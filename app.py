@@ -299,7 +299,7 @@ def profile():
 
 @app.route('/home/sensor',methods=['GET','POST'])
 def ir():
-    ser.flushInput()
+   # ser.flushInput()
     time.sleep(1)
     #print(ser.readline())
     #irdata = ser.readline()
@@ -314,14 +314,13 @@ def ir():
         templateData = {
             'ir':'off'
         }
-        irdata = ser.readline().decode()
+        irdata = ser.readlines().decode()
         print(irdata)
         if "irOn" in irdata:
             print('works')
             templateData = {
             'ir':'on'
-            }
-            ser.write(str.encode('buzzer/true'))   
+            }  
 
         elif "GasHigh" in irdata:
             templateData = {
@@ -329,17 +328,6 @@ def ir():
             }
 
 
-    # irdata = ser.readline().decode()
-    # print(irdata)
-    # print(ser.inWaiting())
-    # if irdata == 'irOn':
-    #     templateData = {
-    #     'ir':'on'
-    # }
-    # else:
-    #     templateData = {
-    #         'ir':'off'
-    #     }
     
     return jsonify(templateData)
     #return render_template('home.html',**templateData)    

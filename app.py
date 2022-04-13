@@ -234,8 +234,7 @@ def blindControl():
             state = request.get_data()    
             print(state.decode())
             ser.write(str.encode('blinds/'+state.decode()))
-            cursor.execute('INSERT INTO doorUsage VALUES (NULL, %s, %s, NULL)', (session['id'], state.decode()))
-
+            
         return render_template('home.html',**templateData)
     return redirect(url_for('login'))
 
@@ -251,7 +250,8 @@ def doorControl():
             state = request.get_data()    
             print(state.decode())
             ser.write(str.encode('door/'+state.decode()))
-
+            cursor.execute('INSERT INTO doorUsage VALUES (NULL, %s, %s, NULL)', (session['id'], state.decode()))
+            mysql.connection.commit() 
         return render_template('home.html',**templateData)
     return redirect(url_for('login'))    
 
@@ -267,7 +267,7 @@ def fanControl():
             state = request.get_data()    
             print(state.decode())
             ser.write(str.encode('fan/'+state.decode()))
-
+        
         return render_template('home.html',**templateData)
     return redirect(url_for('login'))        
 

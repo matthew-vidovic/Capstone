@@ -154,7 +154,7 @@ body.loggedin {
 
 #customers td, #customers th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 20px;
 }
 
 #customers tr:nth-child(even){background-color: #f2f2f2;}
@@ -252,3 +252,11 @@ body.loggedin {
 	color: white;
   }
   
+  .control h3{
+	padding-top:15px;  
+  }
+
+   #fanControl{
+	  width:80%;
+	  
+  } 

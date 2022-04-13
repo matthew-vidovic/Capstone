@@ -8,34 +8,43 @@
             'pageLength':50
             })
 
-        google.charts.load('current', {'packages':['corechart']});
+      //  google.charts.load('current', {'packages':['corechart']});
 
         // Set a callback to run when the Google Visualization API is loaded.
-        google.charts.setOnLoadCallback(drawChart);    
+        //google.charts.setOnLoadCallback(drawChart);    
 });
 
 function drawChart() {
+    /* var data = google.visualization.arrayToDataTable([
+      ['Year', 'Sales'],
+      ['2004',  1000],
+      ['2005',  1170],
+      ['2006',  660],
+      ['2007',  1030]
+    ]);*/ 
 
-	// Create the data table.
-	var data = new google.visualization.DataTable();
-	data.addColumn('string', 'Topping');
-	data.addColumn('number', 'Slices');
-	data.addRows([
-	  ['Mushrooms', 3],
-	  ['Onions', 1],
-	  ['Olives', 1],
-	  ['Zucchini', 1],
-	  ['Pepperoni', 2]
-	]);
+    var data = new google.visualization.DataTable();
+    data.addColumn('timeofday','time');
+    data.addColumn('number','lights');
+    data.addRows([
 
-	// Set chart options
-	var options = {'title':'How Much Pizza I Ate Last Night',
-				   'width':400,
-				   'height':300};
+        [[8,30,0],0],[[9,30,0],1],[[10,30,0],0],
+        [[11,30,0],1],[[12,30,0],0], [[13,30,0],1],
+        [[14,30,0],0],[[15,30,0],1], [[16,30,0],0],
+        [[17,30,0],1],[[18,30,0],0], [[19,30,0],1],
+        [[20,30,0],0],[[21,30,0],1], [[22,30,0],0]
+        
+    ])
 
-	// Instantiate and draw our chart, passing in some options.
-	var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-	chart.draw(data, options);
+    var options = {
+      title: 'Company Performance',
+      curveType: 'function',
+      legend: { position: 'bottom' }
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+    chart.draw(data, options);
   }
 {% endblock %}
 {% block content %}
@@ -57,6 +66,7 @@ function drawChart() {
         </tr>
     </table>
 </div>
+
 <div>
     <h4>Light Usage:</h4>
     <table id='customers'>
@@ -64,6 +74,7 @@ function drawChart() {
             <tr>
                 <th>User ID</th>
                 <th>Value set to</th>
+                <th>Room</th>
                 <th>Date Time</th>
             </tr>
         </thead>
@@ -71,10 +82,14 @@ function drawChart() {
             {% for row in lightUsage %}
                 <tr>
                     <td>
-                        {{row.user_id}}
+                        test
+                        <!-- {{row.user_id}} -->
                     </td>
                     <td>
                         {{row.currentValue}}
+                    </td>
+                    <td>
+                        {{row.room}}
                     </td>
                     <td>
                         {{row.timeStamp}}

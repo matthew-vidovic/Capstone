@@ -1,13 +1,16 @@
+from urllib import response
 import RPi.GPIO as GPIO    
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, Response, jsonify
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
 import serial
 from time import sleep
+from datetime import datetime
+import time
 
 #import bluetooth
-ser = serial.Serial('/dev/rfcomm0',9600)
+#ser = serial.Serial('/dev/rfcomm4',9600)
 
 
 app = Flask(__name__)
@@ -60,6 +63,8 @@ def login():
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
+            session['role'] = account['role']
+            session['authenticated'] = account['authenticated']
             # Redirect to home page
             return redirect(url_for('home'))
         else:
@@ -89,6 +94,7 @@ def register():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
+        role='user'
         
         # Check if account exists using MySQL
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -105,7 +111,7 @@ def register():
             msg = 'Please fill out the form!'
         else:
             # Account doesnt exists and the form data is valid, now insert new account into accounts table
-            cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s)', (username, password, email,))
+            cursor.execute('INSERT INTO accounts VALUES (NULL, %s, %s, %s, %s)', (username, password, email, role))
             mysql.connection.commit()
             msg = 'You have successfully registered!'
             
@@ -124,7 +130,8 @@ def home():
         #GPIO.output(13,GPIO.LOW)
         templateData = {
             'username':session['username'],
-            'led':ledSts
+            'led':ledSts,
+            'ir':'test'
             }
         return render_template('home.html', **templateData)
     # User is not loggedin redirect to login page
@@ -169,130 +176,108 @@ def ledControl():
             'led':ledSts
             }
         if request.method == "POST":    
-            state = request.get_data()
-            print(state)
-            if state.decode() == 'true':
-                print('writing')
+            ledData = request.get_data().decode().split('state=')
+            state = ledData[1].split('&')[0]
+            #state =request.args.get('state')
+            room = ledData[1].split('&')[1]
+            roomName = room.split('room=')[1]
+            print(roomName)
+            if state == 'true':
                 #prevValue = GPIO.input(led)
                 #GPIO.output(13,GPIO.HIGH)
-                ser.write(str.encode('1'))
+                #ser.write(str.encode('1'))
+                #ser.write(str.encode('led/'+state+'/'+roomName))
+                cursor.execute('INSERT INTO lightUsage VALUES (NULL, %s, %s, NULL, %s)', (session['id'], 1, roomName))
+                
                 
             else:
                 
                 # prevValue = GPIO.input(led)
                 # GPIO.output(13,GPIO.LOW)
-                ser.write(str.encode('3'))
+                #ser.write(str.encode('3'))
+                #ser.write(str.encode('led/'+state+'/'+roomName))
+                cursor.execute('INSERT INTO lightUsage VALUES (NULL, %s, %s, NULL, %s)', (session['id'], 0, roomName))
                 # templateData = {
                 #     'username':session['username'],
                 #     "led":ledSts
                 # }    
-
+            mysql.connection.commit() 
         return render_template('home.html',**templateData)
 
     return redirect(url_for('login'))
 
+@app.route('/home/rgb',methods=["GET","POST"])
+def rgbControl():
+    if 'loggedin' in session:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        templateData = {
+            'username':session['username'],
+            'led':ledSts
+            }
+        if request.method == "POST":
+            state = request.get_data()    
+            print(state.decode())
+            ser.write(str.encode('rgb/'+state.decode()))
 
-    #lighting without rgb
-# @app.route('/pythonlogin/home/led/<room>/true')
-# def ledOn(room):
-#     if 'loggedin' in session:
-        
-#         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        
-#         prevValue = GPIO.input(led)
-#         GPIO.output(13,GPIO.HIGH)
-#         ledSts = GPIO.input(led)
-        
-#         if(prevValue != 1):
-#             cursor.execute('INSERT INTO lightUsage VALUES (NULL, %s, %s, NULL)', (session['id'], 1))
-#             mysql.connection.commit() 
-        
-#         templateData = {
-#             'username':session['username'],
-#             "led":ledSts
-#             }
-#         return render_template('home.html',**templateData)
+        return render_template('home.html',**templateData)
+    return redirect(url_for('login'))
 
-            
-#     return redirect(url_for('login'))
+@app.route('/home/blinds', methods=['GET','POST'])
+def blindControl():
+    if 'loggedin' in session:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        templateData = {
+            'username':session['username'],
+            'led':ledSts
+            }
+        if request.method == "POST":
+            state = request.get_data()    
+            print(state.decode())
+            ser.write(str.encode('blinds/'+state.decode()))
+
+        return render_template('home.html',**templateData)
+    return redirect(url_for('login'))
+
+@app.route('/home/door', methods=['GET','POST'])
+def doorControl():
+    if 'loggedin' in session:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        templateData = {
+            'username':session['username'],
+            'led':ledSts
+            }
+        if request.method == "POST":
+            state = request.get_data()    
+            print(state.decode())
+            ser.write(str.encode('door/'+state.decode()))
+
+        return render_template('home.html',**templateData)
+    return redirect(url_for('login'))    
+
+@app.route('/home/fan', methods=['GET','POST'])
+def fanControl():
+    if 'loggedin' in session:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        templateData = {
+            'username':session['username'],
+            'led':ledSts
+            }
+        if request.method == "POST":
+            state = request.get_data()    
+            print(state.decode())
+            ser.write(str.encode('fan/'+state.decode()))
+
+        return render_template('home.html',**templateData)
+    return redirect(url_for('login'))        
+
     
-        
-@app.route('/home/rgb/<color>')
-def rgbControl(color):
-    if color == "red":
-        GPIO.output(rgbred,GPIO.HIGH)
-        GPIO.output(rgbgreen,GPIO.LOW)
-        GPIO.output(rgbblue,GPIO.LOW)   
-    elif color == "green":
-        GPIO.output(rgbred,GPIO.LOW)
-        GPIO.output(rgbgreen,GPIO.HIGH)
-        GPIO.output(rgbblue,GPIO.LOW)   
-    elif color == "blue": 
-        GPIO.output(rgbred,GPIO.LOW)
-        GPIO.output(rgbgreen,GPIO.LOW)
-        GPIO.output(rgbblue,GPIO.HIGH)   
-    elif color == 'white':
-        GPIO.output(rgbred,GPIO.HIGH)
-        GPIO.output(rgbgreen,GPIO.HIGH)
-        GPIO.output(rgbblue,GPIO.HIGH)   
-    elif color == 'yellow':
-        GPIO.output(rgbred,GPIO.HIGH)
-        GPIO.output(rgbgreen,GPIO.HIGH)
-        GPIO.output(rgbblue,GPIO.LOW)   
-    elif color == 'purple':
-        GPIO.output(rgbred,GPIO.HIGH)
-        GPIO.output(rgbgreen,GPIO.LOW)
-        GPIO.output(rgbblue,GPIO.HIGH)   
-    elif color == 'cyan':   
-        GPIO.output(rgbred,GPIO.LOW)
-        GPIO.output(rgbgreen,GPIO.HIGH)
-        GPIO.output(rgbblue,GPIO.HIGH)   
-    elif color == 'rainbow':
-        while True:
-            GPIO.output(rgbred,GPIO.HIGH)
-            GPIO.output(rgbgreen,GPIO.LOW)
-            GPIO.output(rgbblue,GPIO.LOW)
-            sleep(1)
-
-            #orange
-            #yellow
-            GPIO.output(rgbred,GPIO.HIGH)
-            GPIO.output(rgbgreen,GPIO.HIGH)
-            GPIO.output(rgbblue,GPIO.LOW) 
-            sleep(1)
-
-            #green
-            GPIO.output(rgbred,GPIO.LOW)
-            GPIO.output(rgbgreen,GPIO.HIGH)
-            GPIO.output(rgbblue,GPIO.LOW) 
-            sleep(1)
-            #blue
-            GPIO.output(rgbred,GPIO.LOW)
-            GPIO.output(rgbgreen,GPIO.LOW)
-            GPIO.output(rgbblue,GPIO.HIGH)  
-            sleep(1)
-            #indigo
-            GPIO.output(rgbred,GPIO.LOW)
-            GPIO.output(rgbgreen,GPIO.HIGH)
-            GPIO.output(rgbblue,GPIO.HIGH)  
-            sleep(1)
-
-            #purple
-            GPIO.output(rgbred,GPIO.HIGH)
-            GPIO.output(rgbgreen,GPIO.LOW)
-            GPIO.output(rgbblue,GPIO.HIGH) 
-            sleep(1)
-        else:   
-            GPIO.output(rgbred,GPIO.LOW)
-            GPIO.output(rgbgreen,GPIO.LOW)
-            GPIO.output(rgbblue,GPIO.LOW) 
-    return render_template('home.html')       
 
 # http://localhost:5000/pythinlogin/profile - this will be the profile page, only accessible for loggedin users
 @app.route('/profile')
 def profile():
     # Check if user is loggedin
     if 'loggedin' in session:
+        print(session['role'])
         # We need all the account info for the user so we can display it on the profile page
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM accounts WHERE id = %s', (session['id'],))
@@ -308,5 +293,72 @@ def profile():
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
+
+
+
+@app.route('/home/ir',methods=['GET','POST'])
+def ir():
+    ser.flushInput()
+    time.sleep(1)
+    #print(ser.readline())
+    #irdata = ser.readline()
+
+    ifData = ser.inWaiting()
+
+    if(ifData == 0):
+        templateData = {
+            'ir':'off'
+        }
+    else:
+        templateData = {
+            'ir':'off'
+        }
+        irdata = ser.readline().decode()
+        print(irdata)
+        if "irOn" in irdata:
+            print('works')
+            templateData = {
+            'ir':'on'
+            }
+            ser.write(str.encode('buzzer/true'))   
+
+        elif "GasHigh" in irdata:
+            templateData = {
+                'gas':"high"
+            }
+
+
+    # irdata = ser.readline().decode()
+    # print(irdata)
+    # print(ser.inWaiting())
+    # if irdata == 'irOn':
+    #     templateData = {
+    #     'ir':'on'
+    # }
+    # else:
+    #     templateData = {
+    #         'ir':'off'
+    #     }
+    
+    return jsonify(templateData)
+    #return render_template('home.html',**templateData)    
+
+@app.route('/home/buzzer',methods=["GET","POST"])
+def buzz():
+    if 'loggedin' in session:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        templateData = {
+            'username':session['username'],
+            'led':ledSts
+            }
+        if request.method == "POST":
+            state = request.get_data()    
+            print(state.decode())
+            ser.write(str.encode('buzzer/'+state.decode()))
+
+        return render_template('home.html',**templateData)
+
+
 if __name__ == '__main__':
-    app.run('192.168.100.186',port=5000,debug=True)
+    app.run('192.168.100.186',port=500,debug=True)
+    print('test')

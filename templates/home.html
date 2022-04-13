@@ -22,22 +22,101 @@
 {% block content %}
 
 <script>
-	function action(name,state){
-		if(name == 'led'){
-			console.log(state)
+
+
+	window.setInterval(() => {
+		//checkSensor();
+	}, 2000);
+
+	function action(name,state,room){
+
+		if (room !== undefined){
+
 			$.ajax({
 				type:'POST',
-				url: '/home/led',
-				data:String(state),
+				url: '/home/'+name,
+				//data:String(state),
+				data:{
+					'state':String(state),
+					'room':room
+				},
 				success:function(response){
-					console.log(response);
+					//console.log(response);
 				},
 				error: function(response){
-					console.log(response);
+					//console.log(response);
 				}
 			});
+
 		}
+
+
+		else{
+			if(name == 'rgb'){
+				console.log(state)
+				$.ajax({
+					type:"POST",
+					url:"/home/rgb",
+					data:{
+						red:state['red'],
+						green:state['green'],
+						blue:state['blue']
+					}
+				})
+			}
+			else{
+				$.ajax({
+					type:'POST',
+					url: '/home/'+name,
+					data:String(state),
+					success:function(response){
+						//console.log(response);
+					},
+					error: function(response){
+						//console.log(response);
+					}
+				});
+			}
+			
+		}
+		
+		
 	}
+
+	function checkSensor(){
+		$.ajax({
+			type:"POST",
+			url:'/home/ir',
+			success:function(res){
+				console.log(res)
+				if(res.ir == 'on'){
+					alert("Someone Entered the House")
+					//action('buzzer',false)
+				}
+				else if(res.gas == 'high'){
+					alert("CARBON MONOXIDE LEVELS TOO HIGH")
+				}
+			}
+		})
+	}
+
+	function printColor(ev){
+		var color = ev.target.value;
+		var red = parseInt(color.substr(1,2),16);
+		var green = parseInt(color.substr(3,2),16);
+		var blue = parseInt(color.substr(5,2),16);
+		console.log('red: '+red+', green: '+green+', blue: '+blue);
+		var rgbdata = {
+			"red":red,
+			"green":green,
+			"blue":blue
+		}
+		action('rgb',rgbdata)
+	}
+
+	$( ".lock" ).click(function() {
+  		$(this).toggleClass('unlocked');
+	});
 </script>
 
 
@@ -48,9 +127,9 @@
 	<li class="nav-item" role="presentation">
 	  <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Control</button>
 	</li>
-	<li class="nav-item" role="presentation">
+	<!-- <li class="nav-item" role="presentation">
 	  <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Monitor</button>
-	</li>
+	</li> -->
 </ul>
   <div class="tab-content" id="myTabContent">
 	<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -62,15 +141,57 @@
 						<td>Kitchen</td>
 						<td>
 							<label class="switch">
-								<input id='led' type="checkbox" name='led' onchange="action(this.name, $('#led')[0].checked)">
-								<!-- <input id='led' type="checkbox" onchange="window.location.href='/home/led/'+$('#led')[0].checked"> -->
+								<input id='kitchen' type="checkbox" name='led' onchange="action(this.name, $('#kitchen')[0].checked, this.id)">
 								<span class="slider round"></span>
 							</label>
 						</td>
+					</tr>
+					<tr>
+						<td>Living Room</td>
+						<td>
+							<label class="switch">
+								<input id='livingroom' type="checkbox" name='led' onchange="action(this.name, $('#livingroom')[0].checked, this.id)",>
+								<span class="slider round"></span>
+							</label>
+						</td>
+					</tr>	
+					<tr>
+						<td>Bathroom</td>
+						<td>
+							<label class="switch">
+								<input id='bathroom' type="checkbox" name='led' onchange="action(this.name, $('#bathroom')[0].checked, this.id)">
+								<span class="slider round"></span>
+							</label>
+						</td>
+					</tr>	
+					<tr>
+						<td>Outside</td>
+						<td>
+							<label class="switch">
+								<input id='hallway' type="checkbox" name='led' onchange="action(this.name, $('#hallway')[0].checked, this.id)">
+								<span class="slider round"></span>
+							</label>
+						</td>
+					</tr>	
+					<tr>
+						<td>Bedroom</td>
+						<td>
+							<label class="switch">
+								<input id='bedroom' type="checkbox" name='led' onchange="action(this.name, $('#bedroom')[0].checked, this.id)">
+								<span class="slider round"></span>
+							</label>
+						</td>
+					</tr>
+					<tr>
+						<td>RGB</td>
+						<td>
+							<input type="color" onchange="printColor(event)" value="#ff0000">
+						</td>
+					</tr>	
 				</tbody>
 			</table>
 		
-			<div style='padding-top:20px'>
+			<!-- <div style='padding-top:20px'>
 				<h5>Living Room </h5>
 				<table id='customers1'>
 					<tr>
@@ -85,19 +206,37 @@
 					</tr>
 				</table>
 			
+			</div> -->
+
+			<div id='fan' class='control'>
+				<h3>Fan</h3>
+				<button class='btn btn-primary' name='fan' onclick="action(this.name,true)">Turn On</button>
+				<button class='btn btn-secondary' name='fan' onclick="action(this.name,false)">Turn Off</button>
 			</div>
-			<h3>Fan</h3>
-			<h3>Blinds</h3>
-			<h3>Door</h3>
+
+			<div id='blinds' class='control'>
+				<h3>Blinds</h3>
+				<button type="button" class="btn btn-success" name='blinds' onclick="action(this.name, true)">Open</button>
+				<button type="button" class="btn btn-danger" name='blinds' onclick="action(this.name, false)">Close</button>
+			</div>
+
+			<div id='door' class='control'>
+				<h3>Door</h3>
+				<button type="button" class="btn btn-success" name='door' onclick="action(this.name, true)">Unlock</button>
+				<button type="button" class="btn btn-danger" name='door' onclick="action(this.name, false)">Lock</button>
+			</div>
+
+			
+			
 			
 		</div>
 	</div>
 
-	<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+	<!-- <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
 		<h3>Gas Sensor</h3>
 		<h3>Motion Detector</h3>
 		<h3>Buzzer</h3>
-	</div>
+	</div> -->
 
   </div>
 

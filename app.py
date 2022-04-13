@@ -298,7 +298,7 @@ def profile():
 
 
 @app.route('/home/sensor',methods=['GET','POST'])
-def ir():
+def sensor():
    # ser.flushInput()
     time.sleep(1)
     #print(ser.readline())

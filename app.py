@@ -121,13 +121,12 @@ def register():
     # Show registration form with message (if any)
     return render_template('register.html', msg=msg)
 
-# http://localhost:5000/pythinlogin/home - this will be the home page, only accessible for loggedin users
+# http://localhost:5000/pythonlogin/home - this will be the home page, only accessible for loggedin users
 @app.route('/home')
 def home():
     # Check if user is loggedin
     if 'loggedin' in session:
         # User is loggedin show them the home page
-        #GPIO.output(13,GPIO.LOW)
         templateData = {
             'username':session['username'],
             'led':ledSts,
@@ -137,34 +136,6 @@ def home():
     # User is not loggedin redirect to login page
     return redirect(url_for('login'))
 
-
-
-# @app.route('/home/led/<state>',methods=['GET','POST'])
-# def ledControl(state):
-#     if 'loggedin' in session:
-#         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-#         templateData = {
-#             'username':session['username'],
-#             'led':ledSts
-#             }
-#         if state == 'true':
-#             #prevValue = GPIO.input(led)
-#             #GPIO.output(13,GPIO.HIGH)
-#             ser.write(str.encode('1'))
-
-#         else:
-            
-#             # prevValue = GPIO.input(led)
-#             # GPIO.output(13,GPIO.LOW)
-#             ser.write(str.encode('0'))
-#             # templateData = {
-#             #     'username':session['username'],
-#             #     "led":ledSts
-#             # }    
-
-#         return render_template('home.html',**templateData)
-
-#     return redirect(url_for('login'))
 
     
 @app.route('/home/led',methods=['GET','POST'])
@@ -292,38 +263,25 @@ def profile():
 
 @app.route('/home/sensor',methods=['GET','POST'])
 def sensor():
-   # ser.flushInput()
+    ser.flushInput()
     time.sleep(1)
-    #print(ser.readline())
-    #irdata = ser.readline()
 
     ifData = ser.inWaiting()
+    templateData = {
+            'ir':'off'
+        }
 
-    if(ifData == 0):
-        templateData = {
-            'ir':'off'
-        }
-    else:
-        templateData = {
-            'ir':'off'
-        }
-        irdata = ser.readlines().decode()
-        print(irdata)
-        if "irOn" in irdata:
-            print('works')
+    if(ifData > 0):
+         irdata = ser.readlines().decode()
+         if "irOn" in irdata:
             templateData = {
             'ir':'on'
-            }  
-
-        elif "GasHigh" in irdata:
+         } 
+         elif "GasHigh" in irdata:
             templateData = {
                 'gas':"high"
-            }
-
-
-    
-    return jsonify(templateData)
-    #return render_template('home.html',**templateData)    
+         }   
+    return jsonify(templateData)  
 
 @app.route('/home/buzzer',methods=["GET","POST"])
 def buzz():

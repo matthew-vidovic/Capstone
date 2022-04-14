@@ -183,24 +183,13 @@ def ledControl():
             roomName = room.split('room=')[1]
             print(roomName)
             if state == 'true':
-                #prevValue = GPIO.input(led)
-                #GPIO.output(13,GPIO.HIGH)
-                #ser.write(str.encode('1'))
-                #ser.write(str.encode('led/'+state+'/'+roomName))
+                ser.write(str.encode('led/'+state+'/'+roomName))
                 cursor.execute('INSERT INTO lightUsage VALUES (NULL, %s, %s, NULL, %s)', (session['id'], 1, roomName))
-                
                 
             else:
                 
-                # prevValue = GPIO.input(led)
-                # GPIO.output(13,GPIO.LOW)
-                #ser.write(str.encode('3'))
-                #ser.write(str.encode('led/'+state+'/'+roomName))
-                cursor.execute('INSERT INTO lightUsage VALUES (NULL, %s, %s, NULL, %s)', (session['id'], 0, roomName))
-                # templateData = {
-                #     'username':session['username'],
-                #     "led":ledSts
-                # }    
+                ser.write(str.encode('led/'+state+'/'+roomName))
+                cursor.execute('INSERT INTO lightUsage VALUES (NULL, %s, %s, NULL, %s)', (session['id'], 0, roomName))    
             mysql.connection.commit() 
         return render_template('home.html',**templateData)
 
@@ -234,6 +223,8 @@ def blindControl():
             state = request.get_data()    
             print(state.decode())
             ser.write(str.encode('blinds/'+state.decode()))
+            cursor.execute('INSERT INTO blindsUsage VALUES (NULL, %s, %s, NULL)', (session['id'], state.decode()))
+            mysql.connection.commit() 
             
         return render_template('home.html',**templateData)
     return redirect(url_for('login'))
@@ -267,6 +258,8 @@ def fanControl():
             state = request.get_data()    
             print(state.decode())
             ser.write(str.encode('fan/'+state.decode()))
+            cursor.execute('INSERT INTO fanUsage VALUES (NULL, %s, %s, NULL)', (session['id'], state.decode()))
+            mysql.connection.commit() 
         
         return render_template('home.html',**templateData)
     return redirect(url_for('login'))        
